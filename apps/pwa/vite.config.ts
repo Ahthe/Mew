@@ -11,18 +11,21 @@ import { defineConfig } from "vite";
 // tanstack router plugin is not needed here.
 const desktopSrc = fileURLToPath(new URL("../desktop/src", import.meta.url));
 
-// Replace the "Char" brand name with "Mew" in all desktop source files at
-// transform time, without touching the desktop source on disk.
+// Replace the "Char" brand name with "Mew" in desktop source files, without
+// touching the source on disk. Runs as a `pre` transform on the RAW source and
+// returns a plain string, so React/esbuild downstream regenerates the sourcemap
+// normally — this plugin never participates in sourcemap reconciliation.
 function rebrandPlugin(from: string, to: string) {
-  const re = new RegExp(`\\b${from}\\b`, "g");
   return {
     name: "rebrand",
+    enforce: "pre" as const,
     transform(code: string, id: string) {
-      if (id.includes("node_modules")) return null;
-      if (!id.endsWith(".ts") && !id.endsWith(".tsx")) return null;
-      const result = code.replace(re, to);
-      if (result === code) return null;
-      return { code: result, map: null };
+      const path = id.split("?")[0];
+      if (path.includes("node_modules")) return null;
+      if (!/\.[cm]?tsx?$/.test(path)) return null;
+      // Fresh regex per call so the global flag's lastIndex never carries over.
+      const result = code.replace(new RegExp(`\\b${from}\\b`, "g"), to);
+      return result === code ? null : result;
     },
   };
 }

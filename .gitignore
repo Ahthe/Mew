@@ -1,6 +1,7 @@
 target/
 node_modules/
 nul
+dist/
 .DS_Store
 .shuttle/
 Secrets*.toml

@@ -41,6 +41,11 @@
   D["plugin:fs-sync|load_session_content"] = { files: [] };
   D["plugin:fs-sync|list_folders"] = [];
   D["plugin:fs-sync|attachment_list"] = [];
+  // Folder ops: TinyBase already updates folder_id in-memory before calling these;
+  // returning { status: "ok" } lets the ops succeed without a real filesystem.
+  D["plugin:fs-sync|move_session"] = { status: "ok" };
+  D["plugin:fs-sync|rename_folder"] = { status: "ok" };
+  D["plugin:fs-sync|session_dir"] = { status: "ok", data: "/vault" };
   D["plugin:settings|vault_base"] = "/vault";
   D["plugin:settings|obsidian_vaults"] = [];
   D["plugin:fs2|read_text_file"] = function () {
