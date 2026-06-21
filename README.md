@@ -6,7 +6,7 @@
 
 ## What is Mew?
 
-Mew is an AI notetaking app specifically designed to take meeting notes. With Mew, you can transcribe all kinds of meetings whether it be online or offline.
+Mew is an AI notetaking app that specifically designed to take meeting notes. With Mew, you can transcribe all kinds of meetings whether it be online or offline.
 
 - **Listens** to your meetings so you can only jot down important stuff
 - **No bots** joining your meetings - Mew listens directly to sounds coming in & out of your computer
