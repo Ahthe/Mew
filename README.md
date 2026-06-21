@@ -1,5 +1,3 @@
-![twitter-image](https://github.com/user-attachments/assets/b6161cfd-ddfa-4c09-9fbb-ab5a2d6961fc)
-
 <p align="center">
   <p align="center">Mew - The AI notepad for <strong>private</strong> meetings</p>
 </p>
