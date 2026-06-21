@@ -1,0 +1,300 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap&family=Instrument+Serif:ital@1&display=swap");
+
+@font-face {
+  font-family: "Redaction";
+  src: url("/fonts/Redaction-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Redaction";
+  src: url("/fonts/Redaction35-Regular.otf") format("opentype");
+  font-weight: 350;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Redaction";
+  src: url("/fonts/Redaction70-Regular.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("/fonts/SF-Pro-Text-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("/fonts/SF-Pro-Text-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("/fonts/SF-Pro-Text-Semibold.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("/fonts/SF-Pro-Text-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@import "tailwindcss";
+@import "tailwind-scrollbar-hide/v4";
+@plugin "@tailwindcss/typography";
+
+@source "../../../packages/transcript/src";
+
+@theme {
+  --font-sans: "SF Pro", system-ui, -apple-system, sans-serif;
+  --font-serif: "Lora", Georgia, serif;
+  --font-serif2: "Instrument Serif", serif;
+  --breakpoint-laptop: 72rem;
+  --animate-ios-opacity-spin: ios-opacity-spin 1s linear infinite;
+
+  /* char.com-inspired palette (shared with desktop) */
+  --color-char-canvas: #f4efe9;
+  --color-char-card: #ffffff;
+  --color-char-ink: #2a2622;
+  --color-char-muted: #817b74;
+  --color-char-muted-soft: #9b948b;
+  --color-char-faint: #b7afa6;
+  --color-char-line: #ece9e3;
+  --color-char-line-soft: #f0e7e0;
+  --color-char-line-faint: #f5eee9;
+  --color-char-sidebar: #f7f2ee;
+  --color-char-selected: #eee3da;
+  --color-char-coral: #ff5f57;
+  --color-char-coral-strong: #e45745;
+  --color-char-blue: #2d7ff9;
+}
+
+@theme inline {
+  @keyframes ios-opacity-spin {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    8.33% {
+      opacity: 0.9;
+    }
+
+    16.67% {
+      opacity: 0.8;
+    }
+
+    25% {
+      opacity: 0.7;
+    }
+
+    33.33% {
+      opacity: 0.6;
+    }
+
+    41.67% {
+      opacity: 0.5;
+    }
+
+    50% {
+      opacity: 0.4;
+    }
+
+    58.33% {
+      opacity: 0.35;
+    }
+
+    66.67% {
+      opacity: 0.3;
+    }
+
+    75% {
+      opacity: 0.25;
+    }
+
+    83.33% {
+      opacity: 0.2;
+    }
+
+    91.67% {
+      opacity: 0.15;
+    }
+  }
+}
+
+@layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  [id] {
+    scroll-margin-top: 69px;
+  }
+
+  @media (max-width: 639px) {
+    [data-blog-article] [id] {
+      scroll-margin-top: 113px;
+    }
+  }
+
+  .prose code:not(pre code) {
+    overflow-wrap: break-word;
+    word-break: break-all;
+  }
+
+  .prose a.anchor {
+    text-decoration: none !important;
+  }
+
+  .prose a.anchor:hover {
+    text-decoration: underline dotted !important;
+  }
+
+  .prose ul:has(> li > input[type="checkbox"]) {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .prose li:has(> input[type="checkbox"]) {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .prose li > input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    border: 1.5px solid #a8a29e;
+    border-radius: 0.25rem;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    top: 0.125rem;
+    margin: 0;
+  }
+
+  .prose li > input[type="checkbox"]:checked {
+    background-color: #57534e;
+    border-color: #57534e;
+  }
+
+  .prose li > input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 0.05rem;
+    width: 0.35rem;
+    height: 0.6rem;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+}
+
+@layer utilities {
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-4px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes scroll-right {
+    0% {
+      transform: translateX(-50%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left linear infinite;
+  }
+
+  .animate-scroll-right {
+    animation: scroll-right linear infinite;
+  }
+
+  @keyframes fade-in-out {
+    0%,
+    100% {
+      opacity: 0;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in-out {
+    animation: fade-in-out 3s ease-in-out infinite;
+  }
+}
+
+.prose
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"]
+    *))::before,
+.prose
+  :where(code):not(:where([class~="not-prose"], [class~="not-prose"]
+    *))::after {
+  content: none;
+}
+
+@layer base {
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    cursor: pointer;
+  }
+}

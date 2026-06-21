@@ -1,0 +1,16 @@
+[alias]
+xtask = "run --package xtask --"
+
+[build]
+# Short target dir avoids Windows 260-char path limit when building CMake-based crates (e.g. libsql-ffi).
+target-dir = "C:/Users/Ahthesham Ali/cargo-target"
+
+[env]
+MACOSX_DEPLOYMENT_TARGET = { value = "14.2", force = true }
+CMAKE_GENERATOR = { value = "Ninja", force = true }
+
+[target.'cfg(all(windows, target_env = "msvc"))']
+rustflags = [
+  "-C",
+  "target-feature=-crt-static",
+]

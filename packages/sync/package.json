@@ -1,0 +1,18 @@
+{
+  "name": "@hypr/sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "tinybase": "^7.3.2"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.3"
+  }
+}

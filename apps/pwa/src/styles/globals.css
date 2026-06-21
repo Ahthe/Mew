@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap") layer(base);
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&display=swap") layer(base);
+
+@import "tailwindcss";
+@import "@hypr/ui/globals.css";
+
+@theme {
+  --font-serif: Lora, Georgia, serif;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-hand: Caveat, ui-rounded, cursive;
+
+  --color-char-canvas: #f4efe9;
+  --color-char-card: #ffffff;
+  --color-char-ink: #2a2622;
+  --color-char-muted: #817b74;
+  --color-char-muted-soft: #9b948b;
+  --color-char-faint: #b7afa6;
+  --color-char-line: #ece9e3;
+  --color-char-line-soft: #f0e7e0;
+  --color-char-line-faint: #f5eee9;
+  --color-char-sidebar: #f7f2ee;
+  --color-char-selected: #eee3da;
+  --color-char-coral: #ff5f57;
+  --color-char-coral-strong: #e45745;
+  --color-char-blue: #2d7ff9;
+  --color-char-tag: #7c3aed;
+
+  --animate-pop-in: pop-in 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  @keyframes pop-in {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-char-line, currentcolor);
+  }
+
+  html,
+  body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    overscroll-behavior: none;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--color-char-canvas);
+    color: var(--color-char-ink);
+  }
+
+  #root {
+    height: 100%;
+    isolation: isolate;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+  }
+}

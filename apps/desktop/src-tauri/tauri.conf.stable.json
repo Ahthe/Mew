@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Char",
+  "mainBinaryName": "char",
+  "identifier": "com.hyprnote.stable",
+  "bundle": {
+    "resources": {
+      "icons/stable/icon.icns": "icons/stable.icns",
+      "icons/nightly/icon.icns": "icons/nightly.icns",
+      "icons/staging/icon.icns": "icons/staging.icns",
+      "icons/pro/icon.icns": "icons/pro.icns"
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": { "schemes": ["hyprnote"] }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://desktop2.hyprnote.com/update/{{target}}-{{arch}}/{{current_version}}?channel=stable"
+      ]
+    }
+  }
+}

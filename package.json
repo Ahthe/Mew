@@ -1,0 +1,24 @@
+{
+  "scripts": {
+    "fmt:check": "echo 'TODO'",
+    "fmt": "dprint fmt",
+    "lint": "oxlint --type-aware || eslint",
+    "plugin:hello-world:install": "pnpm --dir examples/plugins/hello-world install:dev"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "^1.52.0",
+    "@tanstack/eslint-plugin-query": "^5.91.4",
+    "dprint": "^0.51.1",
+    "eslint": "^9.39.2",
+    "oxfmt": "^0.35.0",
+    "oxlint": "^1.50.0",
+    "oxlint-tsgolint": "^0.12.2",
+    "supabase": "^2.76.8",
+    "turbo": "2.8.3",
+    "typescript-eslint": "^8.55.0"
+  },
+  "packageManager": "pnpm@10.30.0",
+  "engines": {
+    "node": ">=22"
+  }
+}

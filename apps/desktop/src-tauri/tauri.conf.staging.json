@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Char Staging",
+  "mainBinaryName": "char-staging",
+  "identifier": "com.hyprnote.staging",
+  "plugins": {
+    "deep-link": {
+      "desktop": { "schemes": ["hyprnote-staging"] }
+    },
+    "updater": {
+      "active": false
+    }
+  },
+  "bundle": {
+    "resources": {
+      "icons/stable/icon.icns": "icons/stable.icns",
+      "icons/nightly/icon.icns": "icons/nightly.icns",
+      "icons/staging/icon.icns": "icons/staging.icns",
+      "icons/pro/icon.icns": "icons/pro.icns"
+    },
+    "icon": [
+      "icons/staging/32x32.png",
+      "icons/staging/128x128.png",
+      "icons/staging/128x128@2x.png",
+      "icons/staging/icon.icns",
+      "icons/staging/icon.ico"
+    ],
+    "macOS": {
+      "dmg": {
+        "background": "assets/dmg-background-staging.png"
+      }
+    }
+  }
+}

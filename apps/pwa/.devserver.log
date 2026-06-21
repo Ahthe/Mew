@@ -1,0 +1,13 @@
+
+> @hypr/pwa@ dev C:\Users\Ahthesham Ali\Documents\GitHub\falcon productivity\hyprnote-main\hyprnote-main\apps\pwa
+> vite dev --port 3001
+
+[2m10:31:52 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+Port 3001 is in use, trying another one...
+
+  [32m[1mVITE[22m v7.3.5[39m  [2mready in [0m[1m1014[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3002[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m10:44:02 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+ ELIFECYCLE  Command failed with exit code 4294967295.
