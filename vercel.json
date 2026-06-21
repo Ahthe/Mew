@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm --filter @hypr/ui build && pnpm --filter @hypr/pwa build",
-  "outputDirectory": "dist",
+  "outputDirectory": "apps/pwa/dist",
   "installCommand": "pnpm install",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

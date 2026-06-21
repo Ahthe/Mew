@@ -51,9 +51,10 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    // Output to apps/pwa/dist. Vercel's project Root Directory is apps/pwa, so it
-    // looks for the build here. dist/ is gitignored, so Tailwind's scanner skips
-    // it (scanning the stale build output OOMs the oxide engine).
+    // Output to apps/pwa/dist. Vercel's Root Directory is the repo root, so the
+    // root vercel.json sets outputDirectory to "apps/pwa/dist" to find this build.
+    // dist/ is gitignored, so Tailwind's scanner skips it (scanning the stale
+    // build output OOMs the oxide engine).
     outDir: "dist",
     chunkSizeWarningLimit: 5000,
   },
