@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AxeIcon, PanelLeftCloseIcon } from "lucide-react";
+import { AxeIcon, FolderIcon, PanelLeftCloseIcon } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 
 import { Button } from "@hypr/ui/components/ui/button";
@@ -19,6 +19,7 @@ import { useShell } from "~/contexts/shell";
 import { SearchResults } from "~/search/components/sidebar";
 import { useSearch } from "~/search/contexts/ui";
 import { TrafficLights } from "~/shared/ui/traffic-lights";
+import { useTabs } from "~/store/zustand/tabs";
 import { commands } from "~/types/tauri.gen";
 
 const DevtoolView = lazy(() =>
@@ -29,6 +30,7 @@ export function LeftSidebar() {
   const { leftsidebar } = useShell();
   const { query } = useSearch();
   const [isProfileExpanded, setIsProfileExpanded] = useState(false);
+  const openCurrent = useTabs((state) => state.openCurrent);
 
   const { data: showDevtoolButton = false } = useQuery({
     queryKey: ["show_devtool"],
@@ -93,6 +95,16 @@ export function LeftSidebar() {
             <ToastArea isProfileExpanded={isProfileExpanded} />
           )}
         </div>
+        <button
+          onClick={() => openCurrent({ type: "folders", id: null })}
+          className={cn([
+            "mx-1 flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5",
+            "text-sm text-char-muted hover:bg-char-selected hover:text-char-ink",
+          ])}
+        >
+          <FolderIcon size={14} />
+          <span>Folders</span>
+        </button>
         <div className="relative z-30">
           <ProfileSection onExpandChange={setIsProfileExpanded} />
         </div>

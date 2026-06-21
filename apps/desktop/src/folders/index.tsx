@@ -1,4 +1,4 @@
-import { FolderIcon, FoldersIcon, StickyNoteIcon } from "lucide-react";
+import { FolderIcon, FoldersIcon, PlusIcon, StickyNoteIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import { cn } from "@hypr/utils";
@@ -14,6 +14,7 @@ import {
 import { useSession } from "~/store/tinybase/hooks";
 import { sessionOps } from "~/store/tinybase/persister/session/ops";
 import * as main from "~/store/tinybase/store/main";
+import { createSession } from "~/store/tinybase/store/sessions";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 
 function useFolderTree() {
@@ -158,7 +159,11 @@ function TabContentFolderTopLevel() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Section icon={<FolderIcon className="h-4 w-4" />} title="Folders">
+      <Section
+        icon={<FolderIcon className="h-4 w-4" />}
+        title="Folders"
+        action={<NewFolderButton />}
+      >
         {topLevelFolderIds.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
             {topLevelFolderIds.map((folderId) => (
@@ -280,7 +285,11 @@ function TabContentFolderSpecific({ folderId }: { folderId: string }) {
     <div className="flex flex-col gap-6">
       <TabContentFolderBreadcrumb folderId={folderId} />
 
-      <Section icon={<FolderIcon className="h-4 w-4" />} title="Folders">
+      <Section
+        icon={<FolderIcon className="h-4 w-4" />}
+        title="Folders"
+        action={<NewFolderButton parentFolderId={folderId} />}
+      >
         {childFolderIds.length > 0 && (
           <div className="grid grid-cols-4 gap-4">
             {childFolderIds.map((childId) => (
@@ -330,6 +339,60 @@ function TabContentFolderBreadcrumb({ folderId }: { folderId: string }) {
         </button>
       )}
     />
+  );
+}
+
+function NewFolderButton({ parentFolderId }: { parentFolderId?: string }) {
+  const [creating, setCreating] = useState(false);
+  const [name, setName] = useState("");
+  const store = main.UI.useStore(main.STORE_ID);
+  const openCurrent = useTabs((state) => state.openCurrent);
+
+  const handleSubmit = useCallback(() => {
+    const trimmed = name.trim();
+    if (!trimmed || !store) {
+      setCreating(false);
+      setName("");
+      return;
+    }
+    const folderId = parentFolderId ? `${parentFolderId}/${trimmed}` : trimmed;
+    createSession(store, "Untitled", folderId);
+    openCurrent({ type: "folders", id: folderId });
+    setCreating(false);
+    setName("");
+  }, [name, store, parentFolderId, openCurrent]);
+
+  if (creating) {
+    return (
+      <div className="flex items-center gap-1.5 rounded-md border px-2 py-1">
+        <FolderIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+        <input
+          autoFocus
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+            if (e.key === "Escape") {
+              setCreating(false);
+              setName("");
+            }
+          }}
+          onBlur={handleSubmit}
+          placeholder="Folder name"
+          className="w-28 bg-transparent text-xs outline-none"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setCreating(true)}
+      className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
+    >
+      <PlusIcon className="h-3.5 w-3.5" />
+      New Folder
+    </button>
   );
 }
 

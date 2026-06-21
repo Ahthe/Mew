@@ -1,7 +1,21 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
 import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { commands as openerCommands } from "@hypr/plugin-opener2";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@hypr/ui/components/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@hypr/ui/components/ui/dialog";
 import { Spinner } from "@hypr/ui/components/ui/spinner";
 import {
   Tooltip,
@@ -17,12 +31,15 @@ import {
   TimelinePrecision,
 } from "./utils";
 
+import { FolderIcon, PlusIcon } from "lucide-react";
+
 import { SessionPreviewCard } from "~/session/components/session-preview-card";
 import { useIsSessionEnhancing } from "~/session/hooks/useEnhancedNotes";
 import { getSessionEvent } from "~/session/utils";
 import type { MenuItemDef } from "~/shared/hooks/useNativeContextMenu";
 import { InteractiveButton } from "~/shared/ui/interactive-button";
 import { useIgnoredEvents } from "~/store/tinybase/hooks";
+import { sessionOps } from "~/store/tinybase/persister/session/ops";
 import {
   captureSessionData,
   deleteSessionCascade,
@@ -312,6 +329,7 @@ const SessionItem = memo(
     const openNew = useTabs((state) => state.openNew);
     const invalidateResource = useTabs((state) => state.invalidateResource);
     const addDeletion = useUndoDelete((state) => state.addDeletion);
+    const [folderDialogOpen, setFolderDialogOpen] = useState(false);
 
     const sessionId = item.id;
     const storeTitle = main.UI.useCell(
@@ -404,6 +422,11 @@ const SessionItem = memo(
           text: "Show in Finder",
           action: handleShowInFinder,
         },
+        {
+          id: "move-to-folder",
+          text: "Move to Folder...",
+          action: () => setFolderDialogOpen(true),
+        },
         { separator: true as const },
         {
           id: "delete",
@@ -415,24 +438,31 @@ const SessionItem = memo(
     );
 
     return (
-      <SessionPreviewCard
-        sessionId={sessionId}
-        side="right"
-        enabled={!selected}
-      >
-        <ItemBase
-          title={title}
-          displayTime={displayTime}
-          calendarId={calendarId}
-          showSpinner={showSpinner}
-          selected={selected}
-          multiSelected={multiSelected}
-          onClick={handleClick}
-          onCmdClick={handleCmdClick}
-          onShiftClick={handleShiftClick}
-          contextMenu={contextMenu}
+      <>
+        <SessionPreviewCard
+          sessionId={sessionId}
+          side="right"
+          enabled={!selected}
+        >
+          <ItemBase
+            title={title}
+            displayTime={displayTime}
+            calendarId={calendarId}
+            showSpinner={showSpinner}
+            selected={selected}
+            multiSelected={multiSelected}
+            onClick={handleClick}
+            onCmdClick={handleCmdClick}
+            onShiftClick={handleShiftClick}
+            contextMenu={contextMenu}
+          />
+        </SessionPreviewCard>
+        <FolderPickerDialog
+          open={folderDialogOpen}
+          onClose={() => setFolderDialogOpen(false)}
+          sessionId={sessionId}
         />
-      </SessionPreviewCard>
+      </>
     );
   },
 );
@@ -461,6 +491,87 @@ function formatDisplayTime(
     : format(date, "MMM d, yyyy");
 
   return `${dateStr}, ${time}`;
+}
+
+function FolderPickerDialog({
+  open,
+  onClose,
+  sessionId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  sessionId: string;
+}) {
+  const [search, setSearch] = useState("");
+  const store = main.UI.useStore(main.STORE_ID);
+  const sessionIds = main.UI.useRowIds("sessions", main.STORE_ID);
+
+  const folders = useMemo(() => {
+    if (!store || !sessionIds) return {} as Record<string, string>;
+    const f: Record<string, string> = {};
+    for (const sid of sessionIds) {
+      const fid = store.getCell("sessions", sid, "folder_id") as string;
+      if (fid && !f[fid]) {
+        const parts = fid.split("/");
+        f[fid] = parts[parts.length - 1] ?? fid;
+      }
+    }
+    return f;
+  }, [sessionIds, store]);
+
+  const handleMove = useCallback(
+    async (folderId: string) => {
+      await sessionOps.moveSessionToFolder(sessionId, folderId);
+      onClose();
+    },
+    [sessionId, onClose],
+  );
+
+  const trimmed = search.trim();
+  const exactMatch = Object.keys(folders).some(
+    (fid) =>
+      fid === trimmed || (folders[fid] ?? "").toLowerCase() === trimmed.toLowerCase(),
+  );
+  const showCreate = trimmed.length > 0 && !exactMatch;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-xs p-0">
+        <DialogHeader className="px-4 pt-4">
+          <DialogTitle className="text-sm font-medium">Move to Folder</DialogTitle>
+        </DialogHeader>
+        <Command>
+          <CommandInput
+            placeholder="Search or type new folder..."
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            <CommandEmpty>
+              {trimmed ? null : "No folders yet — type a name to create one."}
+            </CommandEmpty>
+            <CommandGroup>
+              {Object.entries(folders).map(([fid, name]) => (
+                <CommandItem key={fid} value={name} onSelect={() => handleMove(fid)}>
+                  <FolderIcon className="mr-2 h-4 w-4" />
+                  {name}
+                </CommandItem>
+              ))}
+              {showCreate && (
+                <CommandItem
+                  value={`__create__${trimmed}`}
+                  onSelect={() => handleMove(trimmed)}
+                >
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Create &ldquo;{trimmed}&rdquo;
+                </CommandItem>
+              )}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function CalendarIndicator({ calendarId }: { calendarId: string }) {

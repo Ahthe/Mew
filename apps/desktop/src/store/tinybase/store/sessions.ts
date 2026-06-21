@@ -16,13 +16,18 @@ import { id } from "~/shared/utils";
 
 type Store = NonNullable<ReturnType<typeof main.UI.useStore>>;
 
-export function createSession(store: Store, title?: string): string {
+export function createSession(
+  store: Store,
+  title?: string,
+  folderId?: string,
+): string {
   const sessionId = id();
   store.setRow("sessions", sessionId, {
     title: title ?? "",
     created_at: new Date().toISOString(),
     raw_md: "",
     user_id: DEFAULT_USER_ID,
+    ...(folderId ? { folder_id: folderId } : {}),
   });
   void analyticsCommands.event({
     event: "note_created",
