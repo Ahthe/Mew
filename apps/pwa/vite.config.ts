@@ -51,7 +51,12 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    outDir: "dist",
+    // Emit to the repo-root `dist/` (outside this package). Vercel detects the
+    // Turborepo and resolves the output dir to the root default ("dist"),
+    // ignoring vercel.json#outputDirectory — so we put the build exactly where
+    // it looks. Outside the Vite root, so Tailwind never scans it; gitignored.
+    outDir: "../../dist",
+    emptyOutDir: true,
     chunkSizeWarningLimit: 5000,
   },
   server: { port: 3001 },
