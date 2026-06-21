@@ -1,7 +1,3 @@
-<p align="center">
-  <p align="center">Mew - The AI notepad for <strong>private</strong> meetings</p>
-</p>
-
 ## What is Mew?
 
 Mew is an AI notetaking app that specifically designed to take meeting notes. With Mew, you can transcribe all kinds of meetings whether it be online or offline.
