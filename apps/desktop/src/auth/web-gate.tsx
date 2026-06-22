@@ -1,4 +1,10 @@
+import { CheckCircle2Icon, MailIcon } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@hypr/ui/components/ui/button";
+import { Input } from "@hypr/ui/components/ui/input";
+import { Label } from "@hypr/ui/components/ui/label";
+import { Spinner } from "@hypr/ui/components/ui/spinner";
 
 import { IS_WEB, supabase } from "./client";
 import { useAuth } from "./context";
@@ -44,67 +50,103 @@ function MagicLinkScreen() {
   }
 
   return (
-    <div className="flex h-full items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border border-border bg-card p-8 shadow-lg">
-        <div className="space-y-1.5">
-          <h1 className="text-xl font-semibold">Sign in to Char</h1>
-          <p className="text-sm text-muted-foreground">
-            Get a one-time magic link by email — no password to remember. New
-            here? The same link creates your account.
-          </p>
+    <div className="bg-background relative flex h-full w-full items-center justify-center overflow-hidden p-6">
+      <div className="bg-primary/10 pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl" />
+
+      <div className="animate-in fade-in-0 zoom-in-95 relative w-full max-w-sm duration-300">
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-2xl font-mono text-xl font-semibold">
+            {"{ }"}
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Welcome to Char
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Your notes, goals, and meetings — synced everywhere.
+            </p>
+          </div>
         </div>
 
-        {status === "sent"
-          ? (
-            <div className="space-y-3">
-              <p className="rounded-md bg-muted px-3 py-3 text-sm">
-                Check your inbox — we sent a sign-in link to{" "}
-                <span className="font-medium">{email.trim()}</span>. Open it on
-                this device to finish signing in.
-              </p>
-              <button
-                onClick={() => {
-                  setStatus("idle");
-                  setError(null);
-                }}
-                className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-              >
-                Use a different email
-              </button>
-            </div>
-          )
-          : (
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoFocus
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
-                  placeholder="you@example.com"
-                />
+        <div className="bg-card rounded-2xl border p-6 shadow-sm">
+          {status === "sent"
+            ? (
+              <div className="flex flex-col items-center gap-4 py-2 text-center">
+                <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
+                  <CheckCircle2Icon className="h-6 w-6" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium">Check your inbox</p>
+                  <p className="text-muted-foreground text-sm">
+                    We sent a magic link to{" "}
+                    <span className="text-foreground font-medium">
+                      {email.trim()}
+                    </span>. Open it on this device to finish signing in.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setStatus("idle");
+                    setError(null);
+                  }}
+                >
+                  Use a different email
+                </Button>
               </div>
+            )
+            : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <MailIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoFocus
+                      placeholder="you@example.com"
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
 
-              {error && (
-                <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                  {error}
+                {error && (
+                  <p className="bg-destructive/10 text-destructive rounded-md px-3 py-2 text-xs">
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={status === "sending"}
+                  className="w-full"
+                >
+                  {status === "sending"
+                    ? (
+                      <>
+                        <Spinner size={16} />
+                        Sending…
+                      </>
+                    )
+                    : "Continue with email"}
+                </Button>
+
+                <p className="text-muted-foreground text-center text-xs">
+                  No password needed. New here? Your account is created
+                  automatically.
                 </p>
-              )}
+              </form>
+            )}
+        </div>
 
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="w-full rounded-md bg-primary py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-              >
-                {status === "sending" ? "Sending…" : "Send magic link"}
-              </button>
-            </form>
-          )}
+        <p className="text-muted-foreground/70 mt-6 text-center text-xs">
+          Private by design — your notes stay yours.
+        </p>
       </div>
     </div>
   );
