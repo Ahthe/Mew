@@ -1,6 +1,13 @@
-import { FolderIcon, FoldersIcon, PlusIcon, StickyNoteIcon } from "lucide-react";
+import {
+  FolderIcon,
+  FoldersIcon,
+  PlusIcon,
+  StickyNoteIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
+import { commands as fsSyncCommands } from "@hypr/plugin-fs-sync";
 import { cn } from "@hypr/utils";
 
 import { Section } from "./shared";
@@ -13,6 +20,7 @@ import {
 } from "~/shared/ui/folder-breadcrumb";
 import { useSession } from "~/store/tinybase/hooks";
 import { sessionOps } from "~/store/tinybase/persister/session/ops";
+import { deleteSessionCascade } from "~/store/tinybase/store/deleteSession";
 import * as main from "~/store/tinybase/store/main";
 import { createSession } from "~/store/tinybase/store/sessions";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
@@ -164,13 +172,25 @@ function TabContentFolderTopLevel() {
         title="Folders"
         action={<NewFolderButton />}
       >
-        {topLevelFolderIds.length > 0 && (
-          <div className="grid grid-cols-4 gap-4">
-            {topLevelFolderIds.map((folderId) => (
-              <FolderCard key={folderId} folderId={folderId} />
-            ))}
-          </div>
-        )}
+        {topLevelFolderIds.length > 0
+          ? (
+            <div className="grid grid-cols-4 gap-4">
+              {topLevelFolderIds.map((folderId) => (
+                <FolderCard key={folderId} folderId={folderId} />
+              ))}
+            </div>
+          )
+          : (
+            <div className="flex flex-col items-center gap-1 py-10 text-center">
+              <FoldersIcon className="text-muted-foreground/60 h-8 w-8" />
+              <p className="text-muted-foreground text-sm">
+                No folders yet
+              </p>
+              <p className="text-muted-foreground/70 text-xs">
+                Use “New Folder” above to start organizing your notes.
+              </p>
+            </div>
+          )}
       </Section>
     </div>
   );
@@ -180,6 +200,8 @@ function FolderCard({ folderId }: { folderId: string }) {
   const name = useFolderName(folderId);
   const openCurrent = useTabs((state) => state.openCurrent);
   const { byParent } = useFolderTree();
+  const store = main.UI.useStore(main.STORE_ID);
+  const indexes = main.UI.useIndexes(main.STORE_ID);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
@@ -213,10 +235,44 @@ function FolderCard({ folderId }: { folderId: string }) {
     setIsEditing(false);
   }, [editValue, name, folderId]);
 
+  const handleDelete = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!store) {
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Delete "${name}" and everything inside it? This can't be undone.`,
+      );
+      if (!confirmed) {
+        return;
+      }
+
+      const prefix = folderId + "/";
+      const sessionIdsToDelete = store
+        .getRowIds("sessions")
+        .filter((id) => {
+          const fid = store.getCell("sessions", id, "folder_id") as
+            | string
+            | undefined;
+          return fid === folderId || fid?.startsWith(prefix);
+        });
+
+      for (const id of sessionIdsToDelete) {
+        deleteSessionCascade(store, indexes, id);
+      }
+
+      await fsSyncCommands.deleteFolder(folderId);
+      openCurrent({ type: "folders", id: null });
+    },
+    [store, indexes, folderId, name, openCurrent],
+  );
+
   return (
     <div
       className={cn([
-        "flex flex-col items-center justify-center",
+        "group relative flex flex-col items-center justify-center",
         "hover:bg-muted cursor-pointer gap-2 rounded-lg border p-6",
       ])}
       onClick={() => {
@@ -225,6 +281,18 @@ function FolderCard({ folderId }: { folderId: string }) {
         }
       }}
     >
+      <button
+        type="button"
+        onClick={handleDelete}
+        title="Delete folder"
+        className={cn([
+          "absolute right-2 top-2 rounded-md p-1 opacity-0 transition-opacity",
+          "text-muted-foreground hover:bg-background hover:text-destructive",
+          "group-hover:opacity-100",
+        ])}
+      >
+        <Trash2Icon className="h-4 w-4" />
+      </button>
       <FolderIcon className="text-muted-foreground h-12 w-12" />
       {isEditing ? (
         <input
@@ -345,42 +413,67 @@ function TabContentFolderBreadcrumb({ folderId }: { folderId: string }) {
 function NewFolderButton({ parentFolderId }: { parentFolderId?: string }) {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const store = main.UI.useStore(main.STORE_ID);
   const openCurrent = useTabs((state) => state.openCurrent);
+  const { topLevel, byParent } = useFolderTree();
+
+  const reset = useCallback(() => {
+    setCreating(false);
+    setName("");
+    setError(null);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     const trimmed = name.trim();
-    if (!trimmed || !store) {
-      setCreating(false);
-      setName("");
+    if (!trimmed) {
+      reset();
       return;
     }
+    if (!store) {
+      return;
+    }
+    if (trimmed.includes("/")) {
+      setError("Folder names can't contain “/”.");
+      return;
+    }
+
+    const siblings = parentFolderId ? byParent[parentFolderId] || [] : topLevel;
     const folderId = parentFolderId ? `${parentFolderId}/${trimmed}` : trimmed;
+    if (siblings.includes(folderId)) {
+      setError("A folder with that name already exists here.");
+      return;
+    }
+
     createSession(store, "Untitled", folderId);
     openCurrent({ type: "folders", id: folderId });
-    setCreating(false);
-    setName("");
-  }, [name, store, parentFolderId, openCurrent]);
+    reset();
+  }, [name, store, parentFolderId, byParent, topLevel, openCurrent, reset]);
 
   if (creating) {
     return (
-      <div className="flex items-center gap-1.5 rounded-md border px-2 py-1">
-        <FolderIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-        <input
-          autoFocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSubmit();
-            if (e.key === "Escape") {
-              setCreating(false);
-              setName("");
-            }
-          }}
-          onBlur={handleSubmit}
-          placeholder="Folder name"
-          className="w-28 bg-transparent text-xs outline-none"
-        />
+      <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-1.5 rounded-md border px-2 py-1">
+          <FolderIcon className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
+          <input
+            autoFocus
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (error) setError(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSubmit();
+              if (e.key === "Escape") reset();
+            }}
+            onBlur={handleSubmit}
+            placeholder="Folder name"
+            className="w-28 bg-transparent text-xs outline-none"
+          />
+        </div>
+        {error && (
+          <span className="text-destructive text-[10px]">{error}</span>
+        )}
       </div>
     );
   }

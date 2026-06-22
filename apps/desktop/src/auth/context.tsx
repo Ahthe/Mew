@@ -36,6 +36,7 @@ type AuthState = {
 
 type AuthActions = {
   signIn: () => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<Session | null>;
 };
@@ -270,6 +271,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await openerCommands.openUrl(url, null);
   }, []);
 
+  // Passwordless sign-in/sign-up used by the browser (PWA) gate. Supabase sends
+  // a one-time link; shouldCreateUser makes the same flow handle new accounts.
+  const signInWithMagicLink = useCallback(
+    async (email: string): Promise<{ error: string | null }> => {
+      if (!supabase) {
+        return { error: "Sign-in is not configured." };
+      }
+
+      const emailRedirectTo = typeof window !== "undefined"
+        ? `${window.location.origin}/app/main`
+        : undefined;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo, shouldCreateUser: true },
+      });
+
+      return { error: error ? error.message : null };
+    },
+    [],
+  );
+
   const signOut = useCallback(async () => {
     if (!supabase) {
       return;
@@ -360,6 +383,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       supabase,
       signIn,
+      signInWithMagicLink,
       signOut,
       refreshSession,
       isRefreshingSession: refreshSessionMutation.isPending,
@@ -371,6 +395,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [
       session,
       signIn,
+      signInWithMagicLink,
       signOut,
       refreshSession,
       refreshSessionMutation.isPending,

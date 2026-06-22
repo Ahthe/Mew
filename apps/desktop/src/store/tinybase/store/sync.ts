@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import type { Store } from "tinybase";
 
 import { supabase } from "~/auth/client";
+import { DEFAULT_USER_ID } from "~/shared/utils";
 
 import {
   STORE_ID,
@@ -16,7 +17,9 @@ export function useSupabaseSync() {
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (!store || !userId || !supabase) return;
+    // Only sync for a real signed-in user. The anonymous DEFAULT_USER_ID has no
+    // cloud rows and would just fail RLS, so skip it until auth bridges a user.
+    if (!store || !userId || userId === DEFAULT_USER_ID || !supabase) return;
 
     let cancelled = false;
     startSync({

@@ -12,6 +12,11 @@
 //
 // Must load BEFORE any app module (referenced as a plain <script> in index.html).
 (function () {
+  // Deterministic marker for the PWA/browser build. App code checks this instead
+  // of isTauri(), which reports true here because this shim installs
+  // window.__TAURI_INTERNALS__.
+  window.__MEW_WEB__ = true;
+
   if (window.__TAURI_INTERNALS__ && window.__TAURI_INTERNALS__.invoke) return;
 
   function detectPlatform() {

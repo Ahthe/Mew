@@ -8,6 +8,8 @@ import { useNewNote } from "./main/useNewNote";
 
 import { AuthProvider } from "~/auth";
 import { BillingProvider } from "~/auth/billing";
+import { useAuthStoreBridge } from "~/auth/store-bridge";
+import { WebAuthGate } from "~/auth/web-gate";
 import { NetworkProvider } from "~/contexts/network";
 import {
   UndoDeleteKeyboardHandler,
@@ -20,16 +22,20 @@ export default function MainAppLayout() {
 
   return (
     <AuthProvider>
-      <BillingProvider>
-        <NetworkProvider>
-          <MainAppContent />
-        </NetworkProvider>
-      </BillingProvider>
+      <WebAuthGate>
+        <BillingProvider>
+          <NetworkProvider>
+            <MainAppContent />
+          </NetworkProvider>
+        </BillingProvider>
+      </WebAuthGate>
     </AuthProvider>
   );
 }
 
 function MainAppContent() {
+  useAuthStoreBridge();
+
   return (
     <>
       <Outlet />
