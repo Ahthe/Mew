@@ -25,7 +25,7 @@ While you stay engaged in the conversation, Mew captures every detail so you don
 
 ### From Memos to Summaries
 
-Once the meeting is over, Mew will craft a personalized summary based on your memos — which is not mandatory. Mew will still create great summaries without your notes.
+Once the meeting is over, Mew will craft an personalized summary based on your memos — which is not mandatory. Mew will still create great summaries without your notes.
 
 ![offline enhancing-1](https://github.com/user-attachments/assets/13af787b-2f6e-4877-b90f-719edc45fb75)
 
